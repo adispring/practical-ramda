@@ -1,4 +1,6 @@
 const R = require('ramda');
+const expect = require('expect');
+const tape = require('tape');
 
 console.log(R.range(1, 4));
 
@@ -156,3 +158,9 @@ var containsR = (val, list) => R.ifElse(
 )(list);
 
 console.log(containsR(3, [1, 3, 5, 7]));
+
+expect(containsR(3, [1, 3, 5, 7])).toEqual(true);
+tape('', t => {
+  t.equal(containsR(3, [1, 3, 5, 7]), true);
+  t.end();
+});

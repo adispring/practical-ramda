@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ramda": "^0.24.1"
+    "expect": "^21.2.1",
+    "ramda": "^0.24.1",
+    "tape": "^4.8.0"
   }
 }
