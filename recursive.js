@@ -1,8 +1,6 @@
+/* eslint import/no-unresolved: 0, no-var: 0, vars-on-top: 0, no-nested-ternary: 0, max-len: 0 */
 const R = require('ramda');
 const expect = require('expect');
-const tape = require('tape');
-
-console.log(R.range(1, 4));
 
 // map
 var mapR = (fn, list) =>
@@ -18,9 +16,9 @@ var mapR3 = (fn, list) => R.unless(
   R.converge(R.prepend, [R.compose(fn, R.head), xs => mapR3(fn, R.tail(xs))])
 )(list);
 
-console.log(mapR(R.multiply(2), R.range(1, 5)));
-console.log(mapR2(R.multiply(2), R.range(1, 5)));
-console.log(mapR3(R.multiply(2), R.range(1, 5)));
+expect(mapR(R.multiply(2), R.range(1, 5))).toEqual([2, 4, 6, 8]);
+expect(mapR2(R.multiply(2), R.range(1, 5))).toEqual([2, 4, 6, 8]);
+expect(mapR3(R.multiply(2), R.range(1, 5))).toEqual([2, 4, 6, 8]);
 
 // reduce
 var reduceR = (fn, acc, list) =>
@@ -37,9 +35,9 @@ var reduceR3 = (fn, acc, list) => R.ifElse(
   xs => reduceR3(fn, fn(acc, R.head(xs)), R.tail(xs))
 )(list);
 
-console.log(reduceR(R.add, 0, R.range(1, 5)));
-console.log(reduceR2(R.add, 0, R.range(1, 5)));
-console.log(reduceR3(R.add, 0, R.range(1, 5)));
+expect(reduceR(R.add, 0, R.range(1, 5))).toEqual(10);
+expect(reduceR2(R.add, 0, R.range(1, 5))).toEqual(10);
+expect(reduceR3(R.add, 0, R.range(1, 5))).toEqual(10);
 
 // filter
 var filterR = (pred, list) =>
@@ -56,9 +54,9 @@ var filterR3 = (pred, list) => R.unless(
   R.converge(R.concat, [R.compose(R.ifElse(pred, R.of, R.always([])), R.head), xs => filterR3(pred, R.tail(xs))])
 )(list);
 
-console.log(filterR(a => a % 2, R.range(1, 10)));
-console.log(filterR2(a => a % 2, R.range(1, 10)));
-console.log(filterR3(a => a % 2, R.range(1, 10)));
+expect(filterR(a => a % 2, R.range(1, 10))).toEqual([1, 3, 5, 7, 9]);
+expect(filterR2(a => a % 2, R.range(1, 10))).toEqual([1, 3, 5, 7, 9]);
+expect(filterR3(a => a % 2, R.range(1, 10))).toEqual([1, 3, 5, 7, 9]);
 
 // quickSort
 var quickSortR = R.unless(
@@ -72,7 +70,7 @@ var quickSortR = R.unless(
   }
 );
 
-console.log(quickSortR([8, 18, 2, 5, 4, 6]));
+expect(quickSortR([8, 18, 2, 5, 4, 6])).toEqual([2, 4, 5, 6, 8, 18]);
 
 // fibonacci sequence
 var fibR = n => R.unless(
@@ -80,7 +78,7 @@ var fibR = n => R.unless(
   () => fibR(n - 1) + fibR(n - 2)
 )(n);
 
-console.log(fibR(6));
+expect(fibR(6)).toEqual(8);
 
 // reverse
 var reverseR = R.unless(
@@ -88,7 +86,7 @@ var reverseR = R.unless(
   xs => reverseR(R.tail(xs)).concat(R.head(xs))
 );
 
-console.log(reverseR([1, 3, 5, 7]));
+expect(reverseR([1, 3, 5, 7])).toEqual([7, 5, 3, 1]);
 
 // merge
 
@@ -125,9 +123,9 @@ var mergeR3 = R.cond([
   ],
 ]);
 
-console.log(mergeR([1, 3, 5, 7], [2, 4, 6, 8]));
-console.log(mergeR2([1, 3, 5, 7], [2, 4, 6, 8]));
-console.log(mergeR3([1, 3, 5, 7], [2, 4, 6, 8]));
+expect(mergeR([1, 3, 5, 7], [2, 4, 6, 8])).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+expect(mergeR2([1, 3, 5, 7], [2, 4, 6, 8])).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+expect(mergeR3([1, 3, 5, 7], [2, 4, 6, 8])).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
 
 // maximum
 
@@ -147,8 +145,8 @@ var maximumR2 = xs => {
   }
 };
 
-console.log(maximumR([1, 3, 4, 2, 8, 10, 5]));
-console.log(maximumR2([1, 3, 4, 2, 8, 10, 5]));
+expect(maximumR([1, 3, 4, 2, 8, 10, 5])).toEqual(10);
+expect(maximumR2([1, 3, 4, 2, 8, 10, 5])).toEqual(10);
 
 // contains
 var containsR = (val, list) => R.ifElse(
@@ -157,10 +155,4 @@ var containsR = (val, list) => R.ifElse(
   xs => R.head(xs) === val ? true : containsR(val, R.tail(xs))
 )(list);
 
-console.log(containsR(3, [1, 3, 5, 7]));
-
 expect(containsR(3, [1, 3, 5, 7])).toEqual(true);
-tape('', t => {
-  t.equal(containsR(3, [1, 3, 5, 7]), true);
-  t.end();
-});
