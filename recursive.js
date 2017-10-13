@@ -16,6 +16,18 @@ var mapR3 = (fn, list) => R.unless(
   R.converge(R.prepend, [R.compose(fn, R.head), xs => mapR3(fn, R.tail(xs))])
 )(list);
 
+var mapR4 = (fn, list) => R.unless(
+  R.isEmpty,
+  ([head, ...tail]) => R.prepend(fn(head), mapR4(fn, tail))
+)(list);
+expect(mapR4(R.multiply(2), R.range(1, 5))).toEqual([2, 4, 6, 8]);
+
+var mapR5 = (fn, xs) => R.unless(
+  R.isEmpty,
+  ([head, ...tail]) => [fn(head), ...mapR5(fn, tail)]
+)(xs);
+expect(mapR5(R.multiply(2), R.range(1, 5))).toEqual([2, 4, 6, 8]);
+
 expect(mapR(R.multiply(2), R.range(1, 5))).toEqual([2, 4, 6, 8]);
 expect(mapR2(R.multiply(2), R.range(1, 5))).toEqual([2, 4, 6, 8]);
 expect(mapR3(R.multiply(2), R.range(1, 5))).toEqual([2, 4, 6, 8]);
@@ -71,6 +83,17 @@ var quickSortR = R.unless(
 );
 
 expect(quickSortR([8, 18, 2, 5, 4, 6])).toEqual([2, 4, 5, 6, 8, 18]);
+
+var quickSortR2 = R.unless(
+  R.isEmpty,
+  ([head, ...tail]) => [
+    ...R.compose(quickSortR2, R.filter(R.lte(R.__, head)))(tail),
+    head,
+    ...R.compose(quickSortR2, R.filter(R.gte(R.__, head)))(tail),
+  ]
+);
+
+expect(quickSortR2([8, 18, 2, 5, 4, 6])).toEqual([2, 4, 5, 6, 8, 18]);
 
 // fibonacci sequence
 var fibR = n => R.unless(
@@ -137,7 +160,7 @@ var maximumR = R.cond([
 
 var maximumR2 = xs => {
   if (R.isEmpty(xs)) {
-    throw 'maximumR of empty list';
+    throw new Error('maximumR of empty list');
   } else if (xs.length === 1) {
     return R.head(xs);
   } else {
