@@ -3,6 +3,15 @@ const R = require('ramda');
 const expect = require('expect');
 
 // map
+var mapI = (fn, list) => {
+  var newList = [];
+  for (let i = 0; i < list.length; i++) {
+    newList[i] = fn(list[i]);
+  }
+  return newList;
+};
+expect(mapI(R.multiply(2), R.range(1, 5))).toEqual([2, 4, 6, 8]);
+
 var mapR = (fn, list) =>
   (R.isEmpty(list) ? list : R.prepend(fn(R.head(list)), mapR(fn, R.tail(list))));
 
@@ -20,12 +29,14 @@ var mapR4 = (fn, list) => R.unless(
   R.isEmpty,
   ([head, ...tail]) => R.prepend(fn(head), mapR4(fn, tail))
 )(list);
+
 expect(mapR4(R.multiply(2), R.range(1, 5))).toEqual([2, 4, 6, 8]);
 
 var mapR5 = (fn, xs) => R.unless(
   R.isEmpty,
   ([head, ...tail]) => [fn(head), ...mapR5(fn, tail)]
 )(xs);
+
 expect(mapR5(R.multiply(2), R.range(1, 5))).toEqual([2, 4, 6, 8]);
 
 expect(mapR(R.multiply(2), R.range(1, 5))).toEqual([2, 4, 6, 8]);
@@ -66,34 +77,57 @@ var filterR3 = (pred, list) => R.unless(
   R.converge(R.concat, [R.compose(R.ifElse(pred, R.of, R.always([])), R.head), xs => filterR3(pred, R.tail(xs))])
 )(list);
 
+var filterR4 = (pred, list) => R.unless(
+  R.isEmpty,
+  ([head, ...tail]) => [...(pred(head) ? [head] : []), ...filterR4(pred, tail)]
+)(list);
+expect(filterR4(a => a % 2, R.range(1, 10))).toEqual([1, 3, 5, 7, 9]);
+
 expect(filterR(a => a % 2, R.range(1, 10))).toEqual([1, 3, 5, 7, 9]);
 expect(filterR2(a => a % 2, R.range(1, 10))).toEqual([1, 3, 5, 7, 9]);
 expect(filterR3(a => a % 2, R.range(1, 10))).toEqual([1, 3, 5, 7, 9]);
+expect(filterR4(a => a % 2, R.range(1, 10))).toEqual([1, 3, 5, 7, 9]);
 
 // quickSort
-var quickSortR = R.unless(
-  R.isEmpty,
-  xs => { // 其实可以用扩展符 ... [head, ...tail]
-    const head = R.head(xs);
-    const tail = R.tail(xs);
-    return R.compose(quickSortR, R.filter(R.lte(R.__, head)))(tail)
-     .concat(head)
-     .concat(R.compose(quickSortR, R.filter(R.gte(R.__, head)))(tail));
-  }
+var quickSortR = R.cond(
+  [R.isEmpty, R.always([])],
+  [
+    R.T,
+    xs => {
+      const head = R.head(xs);
+      const tail = R.tail(xs);
+      return R.compose(quickSortR, R.filter(R.lte(R.__, head)))(tail)
+              .concat(head)
+              .concat(R.compose(quickSortR, R.filter(R.gte(R.__, head)))(tail));
+    },
+  ]
 );
 
 expect(quickSortR([8, 18, 2, 5, 4, 6])).toEqual([2, 4, 5, 6, 8, 18]);
 
 var quickSortR2 = R.unless(
   R.isEmpty,
-  ([head, ...tail]) => [
-    ...R.compose(quickSortR2, R.filter(R.lte(R.__, head)))(tail),
-    head,
-    ...R.compose(quickSortR2, R.filter(R.gte(R.__, head)))(tail),
-  ]
+  xs => { // 其实可以用扩展符 ... [head, ...tail]
+    const head = R.head(xs);
+    const tail = R.tail(xs);
+    return R.compose(quickSortR2, R.filter(R.lte(R.__, head)))(tail)
+     .concat(head)
+     .concat(R.compose(quickSortR2, R.filter(R.gte(R.__, head)))(tail));
+  }
 );
 
 expect(quickSortR2([8, 18, 2, 5, 4, 6])).toEqual([2, 4, 5, 6, 8, 18]);
+
+var quickSortR3 = R.unless(
+  R.isEmpty,
+  ([head, ...tail]) => [
+    ...R.compose(quickSortR3, R.filter(R.lte(R.__, head)))(tail),
+    head,
+    ...R.compose(quickSortR3, R.filter(R.gte(R.__, head)))(tail),
+  ]
+);
+
+expect(quickSortR3([8, 18, 2, 5, 4, 6])).toEqual([2, 4, 5, 6, 8, 18]);
 
 // fibonacci sequence
 var fibR = n => R.unless(
